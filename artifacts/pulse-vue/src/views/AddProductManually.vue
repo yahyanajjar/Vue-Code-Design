@@ -176,16 +176,16 @@
             <button
               class="flex-1 flex items-start gap-3 border rounded-xl px-4 py-3.5 text-left transition-all"
               :class="activeTab === 'create'
-                ? 'border-teal-400 bg-teal-50 ring-1 ring-teal-300'
+                ? 'border-violet-400 bg-violet-50 ring-1 ring-violet-300'
                 : 'border-gray-200 hover:border-gray-300 bg-white'"
               @click="activeTab = 'create'"
             >
               <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                   :class="activeTab === 'create' ? 'bg-teal-100' : 'bg-gray-100'">
-                <Sparkles :size="15" :class="activeTab === 'create' ? 'text-teal-600' : 'text-gray-400'" />
+                   :class="activeTab === 'create' ? 'bg-violet-100' : 'bg-gray-100'">
+                <Gem :size="15" :class="activeTab === 'create' ? 'text-violet-600' : 'text-gray-400'" />
               </div>
               <div>
-                <p class="text-sm font-semibold" :class="activeTab === 'create' ? 'text-teal-700' : 'text-gray-700'">Create Product</p>
+                <p class="text-sm font-semibold" :class="activeTab === 'create' ? 'text-violet-700' : 'text-gray-700'">Create Product</p>
                 <p class="text-xs text-gray-500 mt-0.5">Create a new product and add it directly to the table</p>
               </div>
             </button>
@@ -264,57 +264,112 @@
           </div>
 
           <!-- Create Product Tab Content -->
-          <div v-if="activeTab === 'create'" class="px-6 py-4 flex-1 overflow-y-auto">
-            <div class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Product Name <span class="text-red-400">*</span></label>
-                  <input v-model="newProduct.name" type="text" placeholder="e.g. Paracetamol 500mg" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          <div v-if="activeTab === 'create'" class="px-6 py-5 flex-1 overflow-y-auto">
+            <div class="grid grid-cols-2 gap-x-5 gap-y-5">
+              <!-- Code -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Code</label>
+                <input
+                  v-model="newProduct.code"
+                  type="text"
+                  placeholder="Enter product code"
+                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                />
+              </div>
+
+              <!-- Barcode -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Barcode</label>
+                <div class="relative">
+                  <Barcode :size="14" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    v-model="newProduct.barcode"
+                    type="text"
+                    placeholder="Enter barcode"
+                    class="w-full border border-gray-200 rounded-lg pl-10 pr-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  />
                 </div>
-                <div>
-                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Barcode / SKU</label>
-                  <input v-model="newProduct.barcode" type="text" placeholder="e.g. 6250123451234" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Category</label>
-                  <select v-model="newProduct.category" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
-                    <option value="">Select category</option>
-                    <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Manufacturer</label>
-                  <input v-model="newProduct.manufacturer" type="text" placeholder="e.g. Hikma" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Sell Price (JOD) <span class="text-red-400">*</span></label>
-                  <input v-model="newProduct.sellPrice" type="number" step="0.01" min="0" placeholder="0.00" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Quantity</label>
-                  <input v-model="newProduct.qty" type="number" min="0" placeholder="0" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
-                </div>
+              </div>
+
+              <!-- Product Name EN -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Product Name EN</label>
+                <input
+                  v-model="newProduct.name"
+                  type="text"
+                  placeholder="Enter English product name"
+                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                />
+              </div>
+
+              <!-- Product Name AR -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Product Name AR</label>
+                <input
+                  v-model="newProduct.nameAr"
+                  type="text"
+                  dir="rtl"
+                  placeholder="Enter Arabic product name"
+                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-right"
+                />
+              </div>
+
+              <!-- Category -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
+                <select
+                  v-model="newProduct.category"
+                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white appearance-none bg-no-repeat bg-right pr-9"
+                  style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;); background-position: right 0.75rem center;"
+                >
+                  <option v-for="c in createCategories" :key="c" :value="c">{{ c }}</option>
+                </select>
+              </div>
+
+              <!-- Current Stock -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Current Stock</label>
+                <input
+                  v-model="newProduct.qty"
+                  type="number"
+                  min="0"
+                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                />
               </div>
             </div>
           </div>
 
           <!-- Modal Footer -->
-          <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+          <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-white">
             <p v-if="activeTab === 'browse'" class="text-xs text-gray-500">
               <span class="font-semibold text-teal-600">{{ selectedProducts.length }}</span> product{{ selectedProducts.length !== 1 ? 's' : '' }} selected
             </p>
-            <div v-else></div>
-            <div class="flex gap-3">
-              <button class="text-sm font-medium text-gray-500 hover:text-gray-700 px-4 py-2.5 transition-colors" @click="showModal = false">
+            <p v-else class="text-xs text-gray-500">
+              This product will be added as a normal editable row in the manual stock table.
+            </p>
+            <div class="flex gap-3 items-center">
+              <button
+                class="text-sm font-medium text-gray-600 hover:text-gray-800 px-5 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                @click="showModal = false"
+              >
                 Cancel
               </button>
               <button
-                class="flex items-center gap-2 bg-teal-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-teal-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                :disabled="activeTab === 'browse' ? selectedProducts.length === 0 : !newProduct.name || !newProduct.sellPrice"
+                v-if="activeTab === 'browse'"
+                class="flex items-center gap-2 bg-teal-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-teal-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                :disabled="selectedProducts.length === 0"
                 @click="confirmAdd"
               >
                 <Plus :size="14" />
-                {{ activeTab === 'browse' ? `Add ${selectedProducts.length || ''} Product${selectedProducts.length !== 1 ? 's' : ''}` : 'Create & Add' }}
+                Add {{ selectedProducts.length || '' }} Product{{ selectedProducts.length !== 1 ? 's' : '' }}
+              </button>
+              <button
+                v-else
+                class="flex items-center gap-2 bg-violet-500 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-violet-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                :disabled="!newProduct.name"
+                @click="confirmAdd"
+              >
+                Add Product
               </button>
             </div>
           </div>
@@ -329,7 +384,7 @@ import { ref, computed, reactive } from "vue";
 import { RouterLink } from "vue-router";
 import {
   ArrowLeft, Package, Gift, Plus, X, Search, SlidersHorizontal,
-  Check, Sparkles, Save, Pill,
+  Check, Sparkles, Save, Pill, Gem, Barcode,
 } from "lucide-vue-next";
 import ProductThumbnail from "../components/ProductThumbnail.vue";
 
@@ -391,14 +446,16 @@ function toggleSelect(p: Product) {
 }
 
 const newProduct = reactive({
-  name: "", barcode: "", category: "", manufacturer: "",
-  sellPrice: "", qty: "0",
+  code: "", barcode: "", name: "", nameAr: "",
+  category: "OTC & Allergy", qty: "0",
+  manufacturer: "", sellPrice: "",
 });
 
-const categories = [
-  "Analgesics", "Antibiotics", "Vitamins & Supplements",
-  "Antidiabetics", "Cardiovascular", "Gastrointestinal",
-  "Antihistamines", "Dermatology", "Respiratory",
+const createCategories = [
+  "OTC & Allergy", "Prescription", "Analgesics", "Antibiotics",
+  "Vitamins & Supplements", "Antidiabetics", "Cardiovascular",
+  "Gastrointestinal", "Antihistamines", "Dermatology",
+  "Respiratory", "Ophthalmology", "Pediatrics",
 ];
 
 function confirmAdd() {
@@ -409,19 +466,23 @@ function confirmAdd() {
     addedProducts.value.push(...toAdd.map(p => ({ ...p })));
     selectedProducts.value = [];
   } else {
-    if (!newProduct.name || !newProduct.sellPrice) return;
+    if (!newProduct.name) return;
     addedProducts.value.push({
       name: newProduct.name,
-      code: `AC-${Math.floor(Math.random() * 900 + 100)}-1`,
+      code: newProduct.code || `AC-${Math.floor(Math.random() * 900 + 100)}-1`,
       barcode: newProduct.barcode || `6250${Math.floor(Math.random() * 1e9).toString().padStart(9, "0")}`,
       category: newProduct.category || "General",
       manufacturer: newProduct.manufacturer || "—",
-      costPrice: (parseFloat(newProduct.sellPrice) * 0.6).toFixed(2),
-      sellPrice: newProduct.sellPrice,
+      costPrice: newProduct.sellPrice ? (parseFloat(newProduct.sellPrice) * 0.6).toFixed(2) : "0.00",
+      sellPrice: newProduct.sellPrice || "0.00",
       thumb: "pill",
       qty: parseInt(newProduct.qty) || 0,
     });
-    Object.assign(newProduct, { name: "", barcode: "", category: "", manufacturer: "", sellPrice: "", qty: "0" });
+    Object.assign(newProduct, {
+      code: "", barcode: "", name: "", nameAr: "",
+      category: "OTC & Allergy", qty: "0",
+      manufacturer: "", sellPrice: "",
+    });
   }
   showModal.value = false;
 }
