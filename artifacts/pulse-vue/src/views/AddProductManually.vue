@@ -266,6 +266,31 @@
           <!-- Create Product Tab Content -->
           <div v-if="activeTab === 'create'" class="px-6 py-5 flex-1 overflow-y-auto">
             <div class="grid grid-cols-2 gap-x-5 gap-y-5">
+              <!-- Code -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Code</label>
+                <input
+                  v-model="newProduct.code"
+                  type="text"
+                  placeholder="Enter product code"
+                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                />
+              </div>
+
+              <!-- Barcode -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Barcode</label>
+                <div class="relative">
+                  <Barcode :size="14" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    v-model="newProduct.barcode"
+                    type="text"
+                    placeholder="Enter barcode"
+                    class="w-full border border-gray-200 rounded-lg pl-10 pr-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
               <!-- Product Name EN -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Product Name EN</label>
@@ -447,7 +472,7 @@ function toggleSelect(p: Product) {
 }
 
 const newProduct = reactive({
-  name: "", nameAr: "",
+  code: "", barcode: "", name: "", nameAr: "",
   category: "OTC & Allergy", qty: "0",
   costPrice: "", sellPrice: "",
 });
@@ -470,8 +495,8 @@ function confirmAdd() {
     if (!newProduct.name) return;
     addedProducts.value.push({
       name: newProduct.name,
-      code: `AC-${Math.floor(Math.random() * 900 + 100)}-1`,
-      barcode: `6250${Math.floor(Math.random() * 1e9).toString().padStart(9, "0")}`,
+      code: newProduct.code || `AC-${Math.floor(Math.random() * 900 + 100)}-1`,
+      barcode: newProduct.barcode || `6250${Math.floor(Math.random() * 1e9).toString().padStart(9, "0")}`,
       category: newProduct.category || "General",
       manufacturer: "—",
       costPrice: newProduct.costPrice || "0.00",
@@ -480,7 +505,7 @@ function confirmAdd() {
       qty: parseInt(newProduct.qty) || 0,
     });
     Object.assign(newProduct, {
-      name: "", nameAr: "",
+      code: "", barcode: "", name: "", nameAr: "",
       category: "OTC & Allergy", qty: "0",
       costPrice: "", sellPrice: "",
     });
