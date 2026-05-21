@@ -21,14 +21,20 @@
 
           <!-- Action Buttons -->
           <div class="flex gap-3 mb-5">
-            <button class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm">
+            <RouterLink
+              to="/go-live"
+              class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm"
+            >
               <Upload :size="15" />
               Go Live with My Inventory
-            </button>
-            <button class="flex items-center gap-2 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+            </RouterLink>
+            <RouterLink
+              to="/add-product"
+              class="flex items-center gap-2 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
+            >
               <PlusCircle :size="15" />
               Add Products Manually
-            </button>
+            </RouterLink>
           </div>
 
           <!-- Reward Banner -->
@@ -46,21 +52,9 @@
 
           <!-- Steps Row -->
           <div class="grid grid-cols-3 gap-3 mb-5">
-            <StepCard
-              :icon="Upload"
-              title="File uploaded"
-              subtitle="Smart matching"
-            />
-            <StepCard
-              :icon="Sparkles"
-              title="Inventory ready"
-              subtitle="Marketplace activated"
-            />
-            <StepCard
-              :icon="Activity"
-              title="Live Monitoring"
-              subtitle="Real-time tracking"
-            />
+            <StepCard :icon="Upload" title="File uploaded" subtitle="Smart matching" />
+            <StepCard :icon="Sparkles" title="Inventory ready" subtitle="Marketplace activated" />
+            <StepCard :icon="Activity" title="Live Monitoring" subtitle="Real-time tracking" />
           </div>
 
           <!-- Footer Banner -->
@@ -80,7 +74,6 @@
 
         <!-- Right Panel -->
         <div class="w-80 p-5 flex flex-col gap-4 bg-white">
-          <!-- Teal Hero Card -->
           <div class="rounded-2xl bg-[#0f766e] text-white p-5">
             <p class="text-xs font-medium text-teal-200 mb-2">What happens next</p>
             <h2 class="text-lg font-bold text-teal-300 leading-snug mb-2">
@@ -91,7 +84,6 @@
             </p>
           </div>
 
-          <!-- Can Immediately -->
           <div>
             <p class="text-xs font-semibold text-gray-700 mb-3">You can immediately:</p>
             <div class="flex flex-col gap-3">
@@ -102,7 +94,6 @@
             </div>
           </div>
 
-          <!-- Leave Old System Card -->
           <div class="rounded-xl bg-teal-50 border border-teal-100 p-4 flex items-start gap-3">
             <div class="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
               <Trophy :size="16" class="text-teal-600" />
@@ -119,16 +110,11 @@
 </template>
 
 <script setup lang="ts">
+import { RouterLink } from "vue-router";
 import {
-  Settings2,
-  Upload,
-  PlusCircle,
-  Gift,
-  Sparkles,
-  Activity,
-  CheckCircle,
-  Trophy,
+  Settings2, Upload, PlusCircle, Gift, Sparkles,
+  Activity, CheckCircle, Trophy,
 } from "lucide-vue-next";
-import StepCard from "./StepCard.vue";
-import ImmediateItem from "./ImmediateItem.vue";
+import StepCard from "../components/StepCard.vue";
+import ImmediateItem from "../components/ImmediateItem.vue";
 </script>
