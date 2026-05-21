@@ -1,326 +1,429 @@
 <template>
-  <main class="p-6 max-w-[860px] mx-auto">
-    <RouterLink to="/" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-5 transition-colors">
-      <ArrowLeft :size="15" />
-      Back to Inventory Setup
-    </RouterLink>
+  <main class="p-6 max-w-[1100px] mx-auto">
+    <!-- Page Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <RouterLink to="/" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <ArrowLeft :size="17" />
+      </RouterLink>
+      <h1 class="text-lg font-bold text-gray-900">Manual Update Stock</h1>
+      <span class="text-gray-300 text-sm">·</span>
+      <p class="text-sm text-gray-500">Manually update stock for selected products using an editable table.</p>
+    </div>
 
+    <!-- Main Card -->
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
-      <!-- Header -->
-      <div class="px-8 py-6 border-b border-gray-100 flex items-center gap-4">
-        <div class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center shrink-0">
-          <PlusCircle :size="20" class="text-teal-600" />
+      <div v-if="addedProducts.length === 0" class="flex items-stretch min-h-[420px]">
+        <!-- Left: Empty State -->
+        <div class="flex-1 p-10 flex flex-col justify-center">
+          <div class="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center mb-5">
+            <Package :size="22" class="text-teal-600" />
+          </div>
+
+          <h2 class="text-xl font-bold text-gray-900 mb-2">No products added yet</h2>
+          <p class="text-sm text-gray-500 mb-6 max-w-sm leading-relaxed">
+            Browse Aumet Core products and add them here to start updating stock manually.
+          </p>
+
+          <!-- Reward Banner -->
+          <div class="flex items-start gap-3 border border-orange-100 bg-orange-50 rounded-xl px-4 py-3.5 mb-7 max-w-sm">
+            <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center shrink-0 mt-0.5">
+              <Gift :size="16" class="text-orange-500" />
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-orange-500 uppercase tracking-wider mb-0.5">Welcome Reward</p>
+              <p class="text-sm font-bold text-gray-800">Get JOD 3.5 when you upload your inventory</p>
+              <p class="text-xs text-gray-500 mt-0.5">Added JOD 3.5 to your wallet for Upload Your Inventory</p>
+            </div>
+          </div>
+
+          <button
+            class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors w-fit shadow-sm"
+            @click="showModal = true"
+          >
+            <Plus :size="15" />
+            Add Product
+          </button>
         </div>
-        <div>
-          <h2 class="text-xl font-bold text-gray-900">Add Product Manually</h2>
-          <p class="text-sm text-gray-500">Fill in the product details below to add it to your inventory.</p>
+
+        <!-- Right: Illustration -->
+        <div class="w-72 p-8 flex items-center justify-center border-l border-gray-100">
+          <div class="w-full rounded-xl border-2 border-dashed border-gray-200 p-4 space-y-2.5">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-2.5 h-2.5 rounded-full bg-teal-400"></div>
+              <div class="h-2.5 bg-gray-200 rounded-full flex-1"></div>
+            </div>
+            <div v-for="i in 4" :key="i" class="flex items-center gap-2">
+              <div class="w-8 h-6 rounded bg-gray-100 shrink-0"></div>
+              <div class="flex-1 space-y-1.5">
+                <div class="h-2 bg-gray-100 rounded-full" :style="{ width: `${70 - i * 8}%` }"></div>
+                <div class="h-2 bg-gray-100 rounded-full w-2/3"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <form @submit.prevent="handleSubmit" class="p-8 space-y-7">
-
-        <!-- Basic Info -->
-        <section>
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Basic Information</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Product Name <span class="text-red-500">*</span></label>
-              <input
-                v-model="form.name"
-                type="text"
-                placeholder="e.g. Paracetamol 500mg"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-                required
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Barcode / SKU</label>
-              <div class="relative">
-                <input
-                  v-model="form.barcode"
-                  type="text"
-                  placeholder="Scan or enter barcode"
-                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition pr-10"
-                />
-                <Barcode :size="16" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
-              <select
-                v-model="form.category"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white"
-              >
-                <option value="">Select category</option>
-                <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Manufacturer</label>
-              <input
-                v-model="form.manufacturer"
-                type="text"
-                placeholder="e.g. Hikma Pharmaceuticals"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Unit of Measure</label>
-              <select
-                v-model="form.unit"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white"
-              >
-                <option value="tablet">Tablet</option>
-                <option value="capsule">Capsule</option>
-                <option value="bottle">Bottle</option>
-                <option value="box">Box</option>
-                <option value="vial">Vial</option>
-                <option value="tube">Tube</option>
-                <option value="sachet">Sachet</option>
-              </select>
-            </div>
-          </div>
-        </section>
-
-        <!-- Pricing & Stock -->
-        <section>
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Pricing & Stock</h3>
-          <div class="grid grid-cols-3 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Selling Price (JOD) <span class="text-red-500">*</span></label>
-              <div class="relative">
-                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">JOD</span>
-                <input
-                  v-model="form.sellingPrice"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  class="w-full border border-gray-200 rounded-lg pl-12 pr-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Cost Price (JOD)</label>
-              <div class="relative">
-                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">JOD</span>
-                <input
-                  v-model="form.costPrice"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  class="w-full border border-gray-200 rounded-lg pl-12 pr-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Opening Quantity <span class="text-red-500">*</span></label>
-              <input
-                v-model="form.quantity"
-                type="number"
-                min="0"
-                placeholder="0"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-                required
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Low Stock Alert</label>
-              <input
-                v-model="form.lowStock"
-                type="number"
-                min="0"
-                placeholder="e.g. 10"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">VAT %</label>
-              <select
-                v-model="form.vat"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white"
-              >
-                <option value="0">0% (Exempt)</option>
-                <option value="5">5%</option>
-                <option value="10">10%</option>
-                <option value="16">16%</option>
-              </select>
-            </div>
-          </div>
-        </section>
-
-        <!-- Batch / Expiry -->
-        <section>
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Batch & Expiry</h3>
-          <div class="grid grid-cols-3 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Batch Number</label>
-              <input
-                v-model="form.batchNumber"
-                type="text"
-                placeholder="e.g. BT-2024-001"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Expiry Date</label>
-              <input
-                v-model="form.expiryDate"
-                type="date"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Storage Condition</label>
-              <select
-                v-model="form.storage"
-                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white"
-              >
-                <option value="room">Room Temperature</option>
-                <option value="fridge">Refrigerated (2–8°C)</option>
-                <option value="frozen">Frozen</option>
-                <option value="controlled">Controlled Substance</option>
-              </select>
-            </div>
-          </div>
-        </section>
-
-        <!-- Marketplace Toggle -->
-        <section>
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Marketplace</h3>
-          <div class="flex items-center justify-between border border-gray-200 rounded-xl px-4 py-3.5">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center">
-                <Store :size="15" class="text-teal-600" />
-              </div>
-              <div>
-                <p class="text-sm font-semibold text-gray-800">List on P2P Marketplace</p>
-                <p class="text-xs text-gray-500">Allow other pharmacies to purchase this item from you</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              class="relative w-11 h-6 rounded-full transition-colors duration-200"
-              :class="form.listOnMarketplace ? 'bg-teal-500' : 'bg-gray-200'"
-              @click="form.listOnMarketplace = !form.listOnMarketplace"
-            >
-              <span
-                class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
-                :class="form.listOnMarketplace ? 'translate-x-5' : 'translate-x-0.5'"
-              />
-            </button>
-          </div>
-        </section>
-
-        <!-- Actions -->
-        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-          <RouterLink to="/" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
-            Cancel
-          </RouterLink>
-          <div class="flex items-center gap-3">
-            <button
-              type="button"
-              class="flex items-center gap-2 border border-gray-200 text-gray-600 px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
-              @click="saveAndAddAnother"
-            >
-              <Plus :size="14" />
-              Save & Add Another
-            </button>
-            <button
-              type="submit"
-              class="flex items-center gap-2 bg-teal-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-teal-700 transition-colors shadow-sm"
-            >
-              <Save :size="14" />
-              Save Product
-            </button>
-          </div>
+      <!-- Products Table (when products added) -->
+      <div v-else class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-sm font-semibold text-gray-700">{{ addedProducts.length }} product{{ addedProducts.length > 1 ? 's' : '' }} added</p>
+          <button
+            class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+            @click="showModal = true"
+          >
+            <Plus :size="13" />
+            Add Product
+          </button>
         </div>
-      </form>
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">PRODUCT</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">CATEGORY</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">MANUFACTURER</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">AVG COST PRICE</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">SELL PRICE</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">QTY</th>
+                <th class="px-4 py-2.5"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in addedProducts" :key="p.barcode" class="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                      <Pill :size="14" class="text-gray-400" />
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-800 text-xs leading-snug">{{ p.name }}</p>
+                      <p class="text-[11px] text-teal-600 font-semibold">{{ p.code }}</p>
+                      <p class="text-[10px] text-gray-400 font-mono">{{ p.barcode }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-xs text-gray-600">{{ p.category }}</td>
+                <td class="px-4 py-3 text-xs text-gray-600">{{ p.manufacturer }}</td>
+                <td class="px-4 py-3 text-xs text-gray-700 font-medium">JOD {{ p.costPrice }}</td>
+                <td class="px-4 py-3">
+                  <input
+                    v-model="p.sellPrice"
+                    type="number"
+                    step="0.01"
+                    class="w-20 border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  />
+                </td>
+                <td class="px-4 py-3">
+                  <input
+                    v-model="p.qty"
+                    type="number"
+                    min="0"
+                    class="w-16 border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  />
+                </td>
+                <td class="px-4 py-3">
+                  <button class="text-gray-300 hover:text-red-400 transition-colors" @click="removeProduct(p.barcode)">
+                    <X :size="14" />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="flex justify-end mt-4">
+          <button class="flex items-center gap-2 bg-teal-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-teal-700 transition-colors">
+            <Save :size="14" />
+            Save Stock Update
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Success Toast -->
-    <Transition name="slide-up">
-      <div v-if="showToast" class="fixed bottom-6 right-6 flex items-center gap-3 bg-gray-900 text-white px-5 py-3.5 rounded-xl shadow-xl z-50">
-        <CheckCircle :size="18" class="text-teal-400" />
-        <p class="text-sm font-medium">{{ toastMsg }}</p>
+    <!-- ── Add Product Modal ── -->
+    <Transition name="fade">
+      <div v-if="showModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" @click.self="showModal = false">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[700px] max-h-[85vh] flex flex-col overflow-hidden">
+          <!-- Modal Header -->
+          <div class="flex items-start justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+            <div>
+              <h3 class="text-lg font-bold text-gray-900">Add Product</h3>
+              <p class="text-sm text-gray-500 mt-0.5">Choose the right source to add products to the table</p>
+            </div>
+            <button class="text-gray-400 hover:text-gray-700 transition-colors p-1" @click="showModal = false">
+              <X :size="18" />
+            </button>
+          </div>
+
+          <!-- Source Tabs -->
+          <div class="px-6 pt-4 pb-3 flex gap-3">
+            <button
+              class="flex-1 flex items-start gap-3 border rounded-xl px-4 py-3.5 text-left transition-all"
+              :class="activeTab === 'browse'
+                ? 'border-teal-400 bg-teal-50 ring-1 ring-teal-300'
+                : 'border-gray-200 hover:border-gray-300 bg-white'"
+              @click="activeTab = 'browse'"
+            >
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                   :class="activeTab === 'browse' ? 'bg-teal-100' : 'bg-gray-100'">
+                <Search :size="15" :class="activeTab === 'browse' ? 'text-teal-600' : 'text-gray-400'" />
+              </div>
+              <div>
+                <p class="text-sm font-semibold" :class="activeTab === 'browse' ? 'text-teal-700' : 'text-gray-700'">Browse Aumet Core</p>
+                <p class="text-xs text-gray-500 mt-0.5">Search and add from the Aumet Core catalog</p>
+              </div>
+            </button>
+
+            <button
+              class="flex-1 flex items-start gap-3 border rounded-xl px-4 py-3.5 text-left transition-all"
+              :class="activeTab === 'create'
+                ? 'border-teal-400 bg-teal-50 ring-1 ring-teal-300'
+                : 'border-gray-200 hover:border-gray-300 bg-white'"
+              @click="activeTab = 'create'"
+            >
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                   :class="activeTab === 'create' ? 'bg-teal-100' : 'bg-gray-100'">
+                <Sparkles :size="15" :class="activeTab === 'create' ? 'text-teal-600' : 'text-gray-400'" />
+              </div>
+              <div>
+                <p class="text-sm font-semibold" :class="activeTab === 'create' ? 'text-teal-700' : 'text-gray-700'">Create Product</p>
+                <p class="text-xs text-gray-500 mt-0.5">Create a new product and add it directly to the table</p>
+              </div>
+            </button>
+          </div>
+
+          <!-- Browse Tab Content -->
+          <div v-if="activeTab === 'browse'" class="flex flex-col flex-1 overflow-hidden px-6 pb-2">
+            <!-- Search Bar -->
+            <div class="flex gap-2 mb-3">
+              <div class="relative flex-1">
+                <Search :size="14" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Search by code, product name, barcode, or manufacturer..."
+                  class="w-full border border-gray-200 rounded-lg pl-9 pr-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+              <button class="flex items-center gap-1.5 border border-gray-200 text-gray-600 px-3.5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+                <SlidersHorizontal :size="14" />
+                Filters
+              </button>
+            </div>
+
+            <!-- Product List -->
+            <div class="overflow-y-auto flex-1 -mx-1 px-1">
+              <table class="w-full text-sm">
+                <thead class="sticky top-0 bg-white border-b border-gray-200">
+                  <tr>
+                    <th class="text-left py-2.5 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Product</th>
+                    <th class="text-left py-2.5 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Category</th>
+                    <th class="text-left py-2.5 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Manufacturer</th>
+                    <th class="text-left py-2.5 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Avg Cost Price</th>
+                    <th class="text-left py-2.5 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Sell Price</th>
+                    <th class="py-2.5 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="p in filteredCatalog"
+                    :key="p.barcode"
+                    class="border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer transition-colors"
+                    @click="toggleSelect(p)"
+                  >
+                    <td class="py-3 px-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shrink-0 text-lg">
+                          {{ p.emoji }}
+                        </div>
+                        <div>
+                          <p class="font-semibold text-gray-800 text-[13px] leading-snug">{{ p.name }}</p>
+                          <p class="text-[11px] text-teal-600 font-semibold">{{ p.code }}</p>
+                          <p class="text-[10px] text-gray-400 font-mono">{{ p.barcode }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-3 px-3 text-xs text-gray-600">{{ p.category }}</td>
+                    <td class="py-3 px-3 text-xs text-gray-600">{{ p.manufacturer }}</td>
+                    <td class="py-3 px-3 text-xs font-medium text-gray-700">JOD {{ p.costPrice }}</td>
+                    <td class="py-3 px-3 text-xs font-medium text-gray-700">JOD {{ p.sellPrice }}</td>
+                    <td class="py-3 px-3 text-center">
+                      <div
+                        class="w-5 h-5 rounded-full border-2 mx-auto flex items-center justify-center transition-colors"
+                        :class="isSelected(p) ? 'bg-teal-600 border-teal-600' : 'border-gray-300 bg-white'"
+                      >
+                        <Check v-if="isSelected(p)" :size="10" class="text-white" stroke-width="3" />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Create Product Tab Content -->
+          <div v-if="activeTab === 'create'" class="px-6 py-4 flex-1 overflow-y-auto">
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Product Name <span class="text-red-400">*</span></label>
+                  <input v-model="newProduct.name" type="text" placeholder="e.g. Paracetamol 500mg" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Barcode / SKU</label>
+                  <input v-model="newProduct.barcode" type="text" placeholder="e.g. 6250123451234" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Category</label>
+                  <select v-model="newProduct.category" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                    <option value="">Select category</option>
+                    <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Manufacturer</label>
+                  <input v-model="newProduct.manufacturer" type="text" placeholder="e.g. Hikma" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Sell Price (JOD) <span class="text-red-400">*</span></label>
+                  <input v-model="newProduct.sellPrice" type="number" step="0.01" min="0" placeholder="0.00" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1.5">Quantity</label>
+                  <input v-model="newProduct.qty" type="number" min="0" placeholder="0" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+            <p v-if="activeTab === 'browse'" class="text-xs text-gray-500">
+              <span class="font-semibold text-teal-600">{{ selectedProducts.length }}</span> product{{ selectedProducts.length !== 1 ? 's' : '' }} selected
+            </p>
+            <div v-else></div>
+            <div class="flex gap-3">
+              <button class="text-sm font-medium text-gray-500 hover:text-gray-700 px-4 py-2.5 transition-colors" @click="showModal = false">
+                Cancel
+              </button>
+              <button
+                class="flex items-center gap-2 bg-teal-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-teal-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                :disabled="activeTab === 'browse' ? selectedProducts.length === 0 : !newProduct.name || !newProduct.sellPrice"
+                @click="confirmAdd"
+              >
+                <Plus :size="14" />
+                {{ activeTab === 'browse' ? `Add ${selectedProducts.length || ''} Product${selectedProducts.length !== 1 ? 's' : ''}` : 'Create & Add' }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </Transition>
   </main>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, computed, reactive } from "vue";
 import { RouterLink } from "vue-router";
 import {
-  ArrowLeft, PlusCircle, Barcode, Store, Plus,
-  Save, CheckCircle,
+  ArrowLeft, Package, Gift, Plus, X, Search, SlidersHorizontal,
+  Check, Sparkles, Save, Pill,
 } from "lucide-vue-next";
+
+const showModal = ref(false);
+const activeTab = ref<"browse" | "create">("browse");
+const searchQuery = ref("");
+const selectedProducts = ref<typeof catalog>([]);
+
+interface Product {
+  name: string; code: string; barcode: string; category: string;
+  manufacturer: string; costPrice: string; sellPrice: string;
+  emoji: string; qty: number;
+}
+
+const addedProducts = ref<Product[]>([]);
+
+const catalog: Product[] = [
+  { name: "Pantoprazole Sodium 40 mg", code: "AC-201-1", barcode: "6250123451123", category: "Gastrointestinal", manufacturer: "Aumet Pharma", costPrice: "11.20", sellPrice: "18.50", emoji: "💊", qty: 0 },
+  { name: "Amoxicillin 500 mg Capsules", code: "AC-105-1", barcode: "6250123451234", category: "Antibiotics", manufacturer: "Hikma", costPrice: "5.40", sellPrice: "9.75", emoji: "💉", qty: 0 },
+  { name: "Atorvastatin 20 mg Tablets", code: "AC-330-1", barcode: "6250123451345", category: "Cardiovascular", manufacturer: "Pfizer", costPrice: "14.30", sellPrice: "22.00", emoji: "❤️", qty: 0 },
+  { name: "Vitamin D3 1,000 IU Softgels", code: "AC-410-1", barcode: "6250123451456", category: "Vitamins & Supplements", manufacturer: "Jamjoom Pharma", costPrice: "8.90", sellPrice: "14.25", emoji: "🌟", qty: 0 },
+  { name: "Metformin 500 mg Tablets", code: "AC-220-1", barcode: "6250123451567", category: "Antidiabetics", manufacturer: "Hikma", costPrice: "3.20", sellPrice: "6.00", emoji: "💊", qty: 0 },
+  { name: "Omeprazole 20 mg Capsules", code: "AC-202-1", barcode: "6250123451678", category: "Gastrointestinal", manufacturer: "Aumet Pharma", costPrice: "4.80", sellPrice: "8.50", emoji: "🔵", qty: 0 },
+  { name: "Cetirizine 10 mg Tablets", code: "AC-315-1", barcode: "6250123451789", category: "Antihistamines", manufacturer: "Pharma Int.", costPrice: "2.10", sellPrice: "4.50", emoji: "🌿", qty: 0 },
+  { name: "Amlodipine 5 mg Tablets", code: "AC-332-1", barcode: "6250123451890", category: "Cardiovascular", manufacturer: "Pfizer", costPrice: "6.75", sellPrice: "11.00", emoji: "❤️", qty: 0 },
+];
+
+const filteredCatalog = computed(() => {
+  const q = searchQuery.value.toLowerCase();
+  if (!q) return catalog;
+  return catalog.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.code.toLowerCase().includes(q) ||
+    p.barcode.includes(q) ||
+    p.manufacturer.toLowerCase().includes(q)
+  );
+});
+
+function isSelected(p: Product) {
+  return selectedProducts.value.some(s => s.barcode === p.barcode);
+}
+
+function toggleSelect(p: Product) {
+  if (isSelected(p)) {
+    selectedProducts.value = selectedProducts.value.filter(s => s.barcode !== p.barcode);
+  } else {
+    selectedProducts.value = [...selectedProducts.value, p];
+  }
+}
+
+const newProduct = reactive({
+  name: "", barcode: "", category: "", manufacturer: "",
+  sellPrice: "", qty: "0",
+});
 
 const categories = [
   "Analgesics", "Antibiotics", "Vitamins & Supplements",
-  "Antidiabetics", "Cardiovascular", "Dermatology",
-  "Respiratory", "Gastrointestinal", "Ophthalmology",
-  "Pediatrics", "OTC General",
+  "Antidiabetics", "Cardiovascular", "Gastrointestinal",
+  "Antihistamines", "Dermatology", "Respiratory",
 ];
 
-const emptyForm = () => ({
-  name: "",
-  barcode: "",
-  category: "",
-  manufacturer: "",
-  unit: "tablet",
-  sellingPrice: "",
-  costPrice: "",
-  quantity: "",
-  lowStock: "",
-  vat: "0",
-  batchNumber: "",
-  expiryDate: "",
-  storage: "room",
-  listOnMarketplace: false,
-});
-
-const form = reactive(emptyForm());
-const showToast = ref(false);
-const toastMsg = ref("");
-
-function showSuccess(msg: string) {
-  toastMsg.value = msg;
-  showToast.value = true;
-  setTimeout(() => (showToast.value = false), 3000);
+function confirmAdd() {
+  if (activeTab.value === "browse") {
+    const toAdd = selectedProducts.value.filter(
+      s => !addedProducts.value.some(a => a.barcode === s.barcode)
+    );
+    addedProducts.value.push(...toAdd.map(p => ({ ...p })));
+    selectedProducts.value = [];
+  } else {
+    if (!newProduct.name || !newProduct.sellPrice) return;
+    addedProducts.value.push({
+      name: newProduct.name,
+      code: `AC-${Math.floor(Math.random() * 900 + 100)}-1`,
+      barcode: newProduct.barcode || `6250${Math.floor(Math.random() * 1e9).toString().padStart(9, "0")}`,
+      category: newProduct.category || "General",
+      manufacturer: newProduct.manufacturer || "—",
+      costPrice: (parseFloat(newProduct.sellPrice) * 0.6).toFixed(2),
+      sellPrice: newProduct.sellPrice,
+      emoji: "💊",
+      qty: parseInt(newProduct.qty) || 0,
+    });
+    Object.assign(newProduct, { name: "", barcode: "", category: "", manufacturer: "", sellPrice: "", qty: "0" });
+  }
+  showModal.value = false;
 }
 
-function handleSubmit() {
-  showSuccess(`"${form.name}" saved to inventory!`);
-}
-
-function saveAndAddAnother() {
-  if (!form.name || !form.sellingPrice || !form.quantity) return;
-  showSuccess(`"${form.name}" saved — add another product.`);
-  Object.assign(form, emptyForm());
+function removeProduct(barcode: string) {
+  addedProducts.value = addedProducts.value.filter(p => p.barcode !== barcode);
 }
 </script>
 
 <style scoped>
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: all 0.3s ease;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
 }
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(12px);
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>
