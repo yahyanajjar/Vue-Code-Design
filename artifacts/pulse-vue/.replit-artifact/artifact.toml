@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Pulse - Pharmacy Management"
+version = "1.0.0"
+id = "artifacts/pulse-vue"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24308
+
+[services.development]
+run = "pnpm --filter @workspace/pulse-vue run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/pulse-vue", "run", "build" ]
+publicDir = "artifacts/pulse-vue/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24308"
+BASE_PATH = "/"
