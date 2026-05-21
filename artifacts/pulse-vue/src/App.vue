@@ -1,11 +1,19 @@
 <template>
-  <div class="min-h-screen bg-[#f4f6f8] font-sans">
+  <div
+    class="h-screen flex flex-col bg-gray-50 overflow-hidden"
+    :dir="isRTL ? 'rtl' : 'ltr'"
+  >
     <Navbar />
-    <RouterView />
+    <div class="flex-1 overflow-y-auto">
+      <RouterView />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import Navbar from "./components/Navbar.vue";
 import { RouterView } from "vue-router";
+import Navbar from "./components/Navbar.vue";
+import { useLanguage } from "./composables/useLanguage";
+
+const { isRTL } = useLanguage();
 </script>

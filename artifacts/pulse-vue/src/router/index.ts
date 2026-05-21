@@ -1,7 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import InventorySetup from "../views/InventorySetup.vue";
-import GoLive from "../views/GoLive.vue";
-import AddProductManually from "../views/AddProductManually.vue";
 
 const basePath = import.meta.env.BASE_URL;
 
@@ -10,18 +7,30 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "inventory-setup",
-      component: InventorySetup,
+      name: "inventory",
+      component: () => import("../views/InventoryPage.vue"),
     },
     {
-      path: "/go-live",
-      name: "go-live",
-      component: GoLive,
+      path: "/update-stock",
+      name: "update-stock",
+      component: () => import("../views/UpdateStockPage.vue"),
+    },
+    {
+      path: "/manual-update-stock",
+      name: "manual-update-stock",
+      component: () => import("../views/ManualUpdateStockPage.vue"),
     },
     {
       path: "/add-product",
-      name: "add-product",
-      component: AddProductManually,
+      redirect: "/manual-update-stock",
+    },
+    {
+      path: "/go-live",
+      redirect: "/",
+    },
+    {
+      path: "/:pathMatch(.*)*",
+      redirect: "/",
     },
   ],
 });
