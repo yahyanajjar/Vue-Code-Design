@@ -266,31 +266,6 @@
           <!-- Create Product Tab Content -->
           <div v-if="activeTab === 'create'" class="px-6 py-5 flex-1 overflow-y-auto">
             <div class="grid grid-cols-2 gap-x-5 gap-y-5">
-              <!-- Code -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Code</label>
-                <input
-                  v-model="newProduct.code"
-                  type="text"
-                  placeholder="Enter product code"
-                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                />
-              </div>
-
-              <!-- Barcode -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Barcode</label>
-                <div class="relative">
-                  <Barcode :size="14" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    v-model="newProduct.barcode"
-                    type="text"
-                    placeholder="Enter barcode"
-                    class="w-full border border-gray-200 rounded-lg pl-10 pr-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
               <!-- Product Name EN -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Product Name EN</label>
@@ -319,7 +294,7 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
                 <select
                   v-model="newProduct.category"
-                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white appearance-none bg-no-repeat bg-right pr-9"
+                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white appearance-none bg-no-repeat pr-9"
                   style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;); background-position: right 0.75rem center;"
                 >
                   <option v-for="c in createCategories" :key="c" :value="c">{{ c }}</option>
@@ -333,6 +308,32 @@
                   v-model="newProduct.qty"
                   type="number"
                   min="0"
+                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                />
+              </div>
+
+              <!-- Cost -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Cost</label>
+                <input
+                  v-model="newProduct.costPrice"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                />
+              </div>
+
+              <!-- Selling Price -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Selling Price</label>
+                <input
+                  v-model="newProduct.sellPrice"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
                   class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 />
               </div>
@@ -446,9 +447,9 @@ function toggleSelect(p: Product) {
 }
 
 const newProduct = reactive({
-  code: "", barcode: "", name: "", nameAr: "",
+  name: "", nameAr: "",
   category: "OTC & Allergy", qty: "0",
-  manufacturer: "", sellPrice: "",
+  costPrice: "", sellPrice: "",
 });
 
 const createCategories = [
@@ -469,19 +470,19 @@ function confirmAdd() {
     if (!newProduct.name) return;
     addedProducts.value.push({
       name: newProduct.name,
-      code: newProduct.code || `AC-${Math.floor(Math.random() * 900 + 100)}-1`,
-      barcode: newProduct.barcode || `6250${Math.floor(Math.random() * 1e9).toString().padStart(9, "0")}`,
+      code: `AC-${Math.floor(Math.random() * 900 + 100)}-1`,
+      barcode: `6250${Math.floor(Math.random() * 1e9).toString().padStart(9, "0")}`,
       category: newProduct.category || "General",
-      manufacturer: newProduct.manufacturer || "—",
-      costPrice: newProduct.sellPrice ? (parseFloat(newProduct.sellPrice) * 0.6).toFixed(2) : "0.00",
+      manufacturer: "—",
+      costPrice: newProduct.costPrice || "0.00",
       sellPrice: newProduct.sellPrice || "0.00",
       thumb: "pill",
       qty: parseInt(newProduct.qty) || 0,
     });
     Object.assign(newProduct, {
-      code: "", barcode: "", name: "", nameAr: "",
+      name: "", nameAr: "",
       category: "OTC & Allergy", qty: "0",
-      manufacturer: "", sellPrice: "",
+      costPrice: "", sellPrice: "",
     });
   }
   showModal.value = false;
