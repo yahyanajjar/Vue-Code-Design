@@ -1,5 +1,5 @@
 <template>
-  <main class="p-6 max-w-[1100px] mx-auto">
+  <main class="p-6 max-w-[1280px] mx-auto">
     <!-- Page Header -->
     <div class="flex items-center gap-3 mb-6">
       <RouterLink to="/" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -64,77 +64,170 @@
       </div>
 
       <!-- Products Table (when products added) -->
-      <div v-else class="p-6">
-        <div class="flex items-center justify-between mb-4">
-          <p class="text-sm font-semibold text-gray-700">{{ addedProducts.length }} product{{ addedProducts.length > 1 ? 's' : '' }} added</p>
+      <div v-else>
+        <!-- Toolbar -->
+        <div class="flex items-center gap-3 p-4 border-b border-gray-100">
+          <div class="relative flex-1">
+            <Search :size="14" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              v-model="tableSearch"
+              type="text"
+              placeholder="Search within selected products..."
+              class="w-full border border-gray-200 rounded-lg pl-9 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+          </div>
           <button
-            class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+            class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shrink-0"
             @click="showModal = true"
           >
-            <Plus :size="13" />
+            <Plus :size="14" />
             Add Product
           </button>
         </div>
-        <div class="border border-gray-200 rounded-xl overflow-hidden">
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">PRODUCT</th>
-                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">CATEGORY</th>
-                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">MANUFACTURER</th>
-                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">AVG COST PRICE</th>
-                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">SELL PRICE</th>
-                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">QTY</th>
-                <th class="px-4 py-2.5"></th>
+            <thead>
+              <tr class="border-b border-gray-100">
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500">Product</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500">Source</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500">Batches</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500">Units</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500">Aumet Reference</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="p in addedProducts" :key="p.barcode" class="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                      <Pill :size="14" class="text-gray-400" />
+              <template v-for="(p, idx) in filteredAdded" :key="p.barcode">
+                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/60">
+                  <!-- Product -->
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="font-semibold text-gray-800 text-[13px]">{{ p.name }}</span>
+                      <span class="text-gray-300">·</span>
+                      <span class="text-[11px] text-teal-600 font-semibold">{{ p.code }}</span>
+                      <span class="text-gray-300">·</span>
+                      <span class="text-[11px] text-gray-400 font-mono">{{ p.barcode }}</span>
                     </div>
-                    <div>
-                      <p class="font-medium text-gray-800 text-xs leading-snug">{{ p.name }}</p>
-                      <p class="text-[11px] text-teal-600 font-semibold">{{ p.code }}</p>
-                      <p class="text-[10px] text-gray-400 font-mono">{{ p.barcode }}</p>
+                  </td>
+                  <!-- Source -->
+                  <td class="px-4 py-3">
+                    <span class="text-xs text-teal-600 font-medium">Aumet Core</span>
+                  </td>
+                  <!-- Batches -->
+                  <td class="px-4 py-3 text-xs text-gray-700 font-medium">{{ Math.max(p.batches.length, 1) }}</td>
+                  <!-- Units -->
+                  <td class="px-4 py-3 text-xs text-gray-700">{{ p.largestUnit }} / {{ p.smallestUnit }}</td>
+                  <!-- Aumet Reference -->
+                  <td class="px-4 py-3">
+                    <span class="inline-block text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-md px-2 py-0.5">Linked</span>
+                  </td>
+                  <!-- Actions -->
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3 justify-end">
+                      <button class="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-800 transition-colors" @click="toggleExpand(p)">
+                        <Pencil :size="12" />
+                        {{ p.expanded ? 'Minimize' : 'Edit' }}
+                      </button>
+                      <button class="text-xs font-medium text-teal-600 hover:text-teal-700 transition-colors" @click="addBatch(p)">
+                        + Add Batch
+                      </button>
+                      <button class="text-xs font-medium text-red-500 hover:text-red-600 transition-colors" @click="removeProduct(p.barcode)">
+                        Delete
+                      </button>
                     </div>
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-xs text-gray-600">{{ p.category }}</td>
-                <td class="px-4 py-3 text-xs text-gray-600">{{ p.manufacturer }}</td>
-                <td class="px-4 py-3 text-xs text-gray-700 font-medium">JOD {{ p.costPrice }}</td>
-                <td class="px-4 py-3">
-                  <input
-                    v-model="p.sellPrice"
-                    type="number"
-                    step="0.01"
-                    class="w-20 border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-teal-500"
-                  />
-                </td>
-                <td class="px-4 py-3">
-                  <input
-                    v-model="p.qty"
-                    type="number"
-                    min="0"
-                    class="w-16 border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-teal-500"
-                  />
-                </td>
-                <td class="px-4 py-3">
-                  <button class="text-gray-300 hover:text-red-400 transition-colors" @click="removeProduct(p.barcode)">
-                    <X :size="14" />
-                  </button>
-                </td>
-              </tr>
+                  </td>
+                </tr>
+
+                <!-- Expanded batch editor -->
+                <tr v-if="p.expanded" class="bg-gray-50/40 border-b border-gray-100">
+                  <td colspan="6" class="px-4 py-4">
+                    <div class="border border-gray-200 rounded-xl bg-white p-4 space-y-3">
+                      <!-- Product info strip -->
+                      <div class="grid grid-cols-[1.4fr_1fr_0.8fr_0.8fr_0.8fr_auto] gap-2 items-center">
+                        <input v-model="p.name" type="text" class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <input v-model="p.barcode" type="text" class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <div class="relative">
+                          <select v-model="p.largestUnit" class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 bg-white appearance-none pr-6">
+                            <option>Box</option><option>Carton</option><option>Bottle</option><option>Pack</option>
+                          </select>
+                          <ChevronDown :size="11" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        </div>
+                        <input v-model="p.smallestUnit" type="text" placeholder="Smallest Unit" class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700" />
+                        <input v-model.number="p.smallestUnitCount" type="number" placeholder="Smallest Unit Count" class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700" />
+                        <button class="flex items-center gap-1 text-xs font-semibold text-teal-600 hover:text-teal-700 whitespace-nowrap px-2" @click="addBatch(p)">
+                          <Plus :size="12" /> Add Batch
+                        </button>
+                      </div>
+
+                      <!-- Batch rows header -->
+                      <div v-if="p.batches.length" class="grid grid-cols-[1fr_0.9fr_1.1fr_0.9fr_0.7fr_0.8fr_0.7fr_0.8fr_0.7fr_1.2fr_auto] gap-2 px-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider pt-1">
+                        <span>Batch Number</span>
+                        <span>Expiry</span>
+                        <span>Warehouse Location</span>
+                        <span>Stock Type Update</span>
+                        <span>Current Stock</span>
+                        <span>New Stock Qty</span>
+                        <span>Cost</span>
+                        <span>Selling Price</span>
+                        <span>New Stock</span>
+                        <span>Reason</span>
+                        <span></span>
+                      </div>
+
+                      <!-- Batch rows -->
+                      <div
+                        v-for="(b, bi) in p.batches"
+                        :key="bi"
+                        class="grid grid-cols-[1fr_0.9fr_1.1fr_0.9fr_0.7fr_0.8fr_0.7fr_0.8fr_0.7fr_1.2fr_auto] gap-2 items-center"
+                      >
+                        <input v-model="b.batchNumber" type="text" placeholder="Batch Number" class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <input v-model="b.expiry" type="text" placeholder="Expiry" class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <input v-model="b.warehouse" type="text" placeholder="Warehouse Loc..." class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <div class="relative">
+                          <select v-model="b.stockType" class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 bg-white appearance-none pr-6">
+                            <option>Stock In</option><option>Stock Out</option><option>Adjustment</option>
+                          </select>
+                          <ChevronDown :size="11" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        </div>
+                        <input v-model.number="b.currentStock" type="number" class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <input v-model.number="b.newStockQty" type="number" placeholder="Qty" class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <input v-model.number="b.cost" type="number" step="0.01" class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <input v-model.number="b.sellingPrice" type="number" step="0.01" class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <input :value="(Number(b.currentStock) || 0) + (Number(b.newStockQty) || 0)" type="number" readonly class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-500 bg-gray-50" />
+                        <input v-model="b.reason" type="text" placeholder="Enter adjustment reas..." class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <button class="text-red-400 hover:text-red-500 p-1" @click="removeBatch(p, bi)">
+                          <Trash2 :size="13" />
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>
-        <div class="flex justify-end mt-4">
-          <button class="flex items-center gap-2 bg-teal-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-teal-700 transition-colors">
-            <Save :size="14" />
-            Save Stock Update
-          </button>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+          <p class="text-xs text-gray-500">Rows: <span class="font-semibold text-gray-700">{{ addedProducts.length }}</span></p>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5 border border-orange-100 bg-orange-50 rounded-lg px-3 py-1.5">
+              <Gift :size="14" class="text-orange-500" />
+              <div class="leading-tight">
+                <p class="text-[10px] font-bold text-orange-500 uppercase tracking-wider">Upload reward · JOD 3.5</p>
+                <p class="text-[11px] text-gray-600">Add {{ Math.max(0, 10 - addedProducts.length) }} more products to reach 10 and unlock the reward.</p>
+              </div>
+            </div>
+            <button class="text-sm font-medium text-gray-600 hover:text-gray-800 px-4 py-2 transition-colors">
+              Cancel
+            </button>
+            <button class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors">
+              <Save :size="13" />
+              Update Stock
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -410,7 +503,7 @@ import { ref, computed, reactive } from "vue";
 import { RouterLink } from "vue-router";
 import {
   ArrowLeft, Package, Gift, Plus, X, Search, SlidersHorizontal,
-  Check, Sparkles, Save, Pill, Gem, Barcode,
+  Check, Sparkles, Save, Pill, Gem, Barcode, Pencil, Trash2, ChevronDown,
 } from "lucide-vue-next";
 import ProductThumbnail from "../components/ProductThumbnail.vue";
 
@@ -419,15 +512,89 @@ const activeTab = ref<"browse" | "create">("browse");
 const searchQuery = ref("");
 const selectedProducts = ref<typeof catalog>([]);
 
+interface Batch {
+  batchNumber: string;
+  expiry: string;
+  warehouse: string;
+  stockType: string;
+  currentStock: number;
+  newStockQty: number;
+  cost: number;
+  sellingPrice: number;
+  reason: string;
+}
+
 interface Product {
   name: string; code: string; barcode: string; category: string;
   manufacturer: string; costPrice: string; sellPrice: string;
   thumb: string; qty: number;
+  expanded?: boolean;
+  largestUnit?: string;
+  smallestUnit?: string;
+  smallestUnitCount?: number;
+  batches: Batch[];
 }
 
-const addedProducts = ref<Product[]>([]);
+type CatalogItem = Omit<Product, "batches" | "expanded" | "largestUnit" | "smallestUnit" | "smallestUnitCount">;
 
-const catalog: Product[] = [
+const addedProducts = ref<Product[]>([]);
+const tableSearch = ref("");
+
+const filteredAdded = computed(() => {
+  const q = tableSearch.value.trim().toLowerCase();
+  if (!q) return addedProducts.value;
+  return addedProducts.value.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.code.toLowerCase().includes(q) ||
+    p.barcode.toLowerCase().includes(q)
+  );
+});
+
+function hydrate(p: Partial<Product> & { name: string; barcode: string }): Product {
+  return {
+    name: p.name,
+    code: p.code || "",
+    barcode: p.barcode,
+    category: p.category || "General",
+    manufacturer: p.manufacturer || "—",
+    costPrice: p.costPrice || "0.00",
+    sellPrice: p.sellPrice || "0.00",
+    thumb: p.thumb || "pill",
+    qty: p.qty ?? 0,
+    expanded: false,
+    largestUnit: p.largestUnit || "Box",
+    smallestUnit: p.smallestUnit || "Piece",
+    smallestUnitCount: p.smallestUnitCount ?? 1,
+    batches: [],
+  };
+}
+
+function toggleExpand(p: Product) {
+  p.expanded = !p.expanded;
+  if (p.expanded && p.batches.length === 0) addBatch(p);
+}
+
+function addBatch(p: Product) {
+  p.expanded = true;
+  p.batches.push({
+    batchNumber: "",
+    expiry: "",
+    warehouse: "",
+    stockType: "Stock In",
+    currentStock: p.qty || 0,
+    newStockQty: 0,
+    cost: parseFloat(p.costPrice) || 0,
+    sellingPrice: parseFloat(p.sellPrice) || 0,
+    reason: "",
+  });
+}
+
+function removeBatch(p: Product, idx: number) {
+  p.batches.splice(idx, 1);
+  if (p.batches.length === 0) p.expanded = false;
+}
+
+const catalog: CatalogItem[] = [
   { name: "Pantoprazole Sodium 40 mg", code: "AC-201-1", barcode: "6250123451123", category: "Gastrointestinal", manufacturer: "Aumet Pharma", costPrice: "11.20", sellPrice: "18.50", thumb: "capsule", qty: 0 },
   { name: "Amoxicillin 500 mg Capsules", code: "AC-105-1", barcode: "6250123451234", category: "Antibiotics", manufacturer: "Hikma", costPrice: "5.40", sellPrice: "9.75", thumb: "pill", qty: 0 },
   { name: "Atorvastatin 20 mg Tablets", code: "AC-330-1", barcode: "6250123451345", category: "Cardiovascular", manufacturer: "Pfizer", costPrice: "14.30", sellPrice: "22.00", thumb: "heart", qty: 0 },
@@ -459,11 +626,11 @@ const filteredCatalog = computed(() => {
   );
 });
 
-function isSelected(p: Product) {
+function isSelected(p: CatalogItem) {
   return selectedProducts.value.some(s => s.barcode === p.barcode);
 }
 
-function toggleSelect(p: Product) {
+function toggleSelect(p: CatalogItem) {
   if (isSelected(p)) {
     selectedProducts.value = selectedProducts.value.filter(s => s.barcode !== p.barcode);
   } else {
@@ -489,11 +656,11 @@ function confirmAdd() {
     const toAdd = selectedProducts.value.filter(
       s => !addedProducts.value.some(a => a.barcode === s.barcode)
     );
-    addedProducts.value.push(...toAdd.map(p => ({ ...p })));
+    addedProducts.value.push(...toAdd.map(p => hydrate(p)));
     selectedProducts.value = [];
   } else {
     if (!newProduct.name) return;
-    addedProducts.value.push({
+    addedProducts.value.push(hydrate({
       name: newProduct.name,
       code: newProduct.code || `AC-${Math.floor(Math.random() * 900 + 100)}-1`,
       barcode: newProduct.barcode || `6250${Math.floor(Math.random() * 1e9).toString().padStart(9, "0")}`,
@@ -503,7 +670,7 @@ function confirmAdd() {
       sellPrice: newProduct.sellPrice || "0.00",
       thumb: "pill",
       qty: parseInt(newProduct.qty) || 0,
-    });
+    }));
     Object.assign(newProduct, {
       code: "", barcode: "", name: "", nameAr: "",
       category: "OTC & Allergy", qty: "0",
